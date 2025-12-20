@@ -17,6 +17,7 @@ const App: React.FC = () => {
   };
 
   const renderView = () => {
+    console.log("Rendering view:", currentView);
     switch (currentView) {
       case 'landing':
         return <LandingPage onNavigate={navigate} />;
