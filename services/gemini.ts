@@ -21,9 +21,10 @@ export class GeminiService {
         
         RULES:
         1. Output a JSON object following the schema provided.
-        2. Service names must be clear (e.g., "Google Calendar", "Slack", "OpenAI").
-        3. Accent Colors: Use #FF9900 for triggers, #A259FF for actions.
-        4. Layout: Space nodes logically from left to right.
+        2. Service names must be clear and map to a valid n8n node type.
+        3. Supported n8n types: 'n8n-nodes-base.googleCalendarTrigger', 'n8n-nodes-base.openAi', 'n8n-nodes-base.slack'.
+        4. Accent Colors: Use #FF9900 for triggers, #A259FF for actions.
+        5. Layout: Space nodes logically from left to right.
         
         SCHEMA:
         {
