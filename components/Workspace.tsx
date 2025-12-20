@@ -5,6 +5,7 @@ import { WorkflowNode, WorkflowEdge } from '../types';
 import { Node } from './Node';
 import { Connection } from './Connection';
 import { gemini } from '../services/gemini';
+import { convertSketchToN8nWorkflow, deployWorkflow } from '../services/n8n';
 
 interface WorkspaceProps {
   onBack: () => void;
@@ -38,6 +39,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
   const [isDraggingNode, setIsDraggingNode] = useState(false);
   const [isPanningCanvas, setIsPanningCanvas] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [deploymentStatus, setDeploymentStatus] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -131,6 +133,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
       e.shiftKey ? redo() : undo();
     }
   }, [undo, redo]);
+
+  const handleDeploy = async () => {
+    setDeploymentStatus('Deploying...');
+    const n8nWorkflow = convertSketchToN8nWorkflow(nodes, edges);
+    const success = await deployWorkflow(n8nWorkflow);
+    setDeploymentStatus(success ? 'Deployment successful!' : 'Deployment failed.');
+  };
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -232,9 +241,15 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path d="M21 10H11a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
             </button>
           </div>
-          <button className="bg-[#1A73E8] text-white px-10 py-4 rounded-[24px] text-[14px] font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1">
-            Build n8n Flow
-          </button>
+          <div className="flex items-center gap-4">
+            {deploymentStatus && <span className="text-sm font-semibold">{deploymentStatus}</span>}
+            <button
+              onClick={handleDeploy}
+              className="bg-[#1A73E8] text-white px-10 py-4 rounded-[24px] text-[14px] font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1"
+            >
+              Build n8n Flow
+            </button>
+          </div>
         </div>
       </header>
 

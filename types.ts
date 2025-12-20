@@ -26,3 +26,37 @@ export interface WorkflowState {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
 }
+
+// n8n-specific types
+export interface N8NNode {
+  parameters: any;
+  id: string;
+  name: string;
+  type: string;
+  typeVersion: number;
+  position: [number, number];
+  credentials?: any;
+}
+
+export interface N8NConnectionData {
+  node: string;
+  input: string | string[][];
+}
+
+
+export interface N8NConnection {
+  main: N8NConnectionData[][];
+}
+
+
+export type N8NConnections = Record<string, N8NConnection>;
+
+export interface N8NWorkflow {
+  name: string;
+  nodes: N8NNode[];
+  connections: N8NConnections;
+  active: boolean;
+  settings: any;
+  id?: string;
+  tags?: string;
+}
