@@ -10,29 +10,33 @@ export class GeminiService {
   }
 
   async generateWorkflow(prompt: string): Promise<{ workflow: WorkflowState; explanation: string }> {
-    const response = await this.ai.models.generateContent({
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    
+    const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
-        systemInstruction: `You are an AI workflow architect for "WorkflowHub".
-        Interpret user requests and output a JSON object representing a valid automation workflow.
+        systemInstruction: `You are a world-class AI Automation Architect.
+        Your task is to convert a human description of a workflow into a high-fidelity "sketch" JSON object.
         
-        The JSON MUST follow this schema:
+        RULES:
+        1. Output a JSON object following the schema provided.
+        2. Service names must be clear (e.g., "Google Calendar", "Slack", "OpenAI").
+        3. Accent Colors: Use #FF9900 for triggers, #A259FF for actions.
+        4. Layout: Space nodes logically from left to right.
+        
+        SCHEMA:
         {
           "workflow": {
             "nodes": [
-              { "id": "n1", "type": "trigger", "service": "Google Calendar", "label": "Event Created", "position": {"x": 100, "y": 200}, "accentColor": "#FF9900" }
+              { "id": "n1", "type": "trigger", "service": "Service Name", "label": "Specific Action", "position": {"x": 100, "y": 200}, "accentColor": "#FF9900" }
             ],
             "edges": [
               { "id": "e1", "source": "n1", "target": "n2" }
             ]
           },
-          "explanation": "Brief human explanation of what the workflow does."
-        }
-        
-        Use service names like "Google Calendar", "OpenAI", "Slack", "Gmail", "Notion".
-        Always use #FF9900 for triggers and #A259FF for actions.
-        Ensure node IDs are unique. Ensure edges connect existing nodes.`,
+          "explanation": "Human-readable explanation."
+        }`,
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
@@ -84,23 +88,38 @@ export class GeminiService {
     });
 
     try {
-      return JSON.parse(response.text);
+      const text = response.text || "{}";
+      return JSON.parse(text);
     } catch (e) {
       console.error("Failed to parse Gemini response:", e);
       throw new Error("Invalid response format from Gemini");
     }
   }
 
-  async chat(message: string, history: { role: 'user' | 'model', parts: [{text: string}] }[]) {
-     const chat = this.ai.chats.create({
-       model: 'gemini-3-pro-preview',
-       config: {
-         systemInstruction: "You are Gemini, a helpful assistant in WorkflowHub. You can answer questions about automation, API configurations, and help refine workflows."
-       }
-     });
-     
-     const result = await chat.sendMessage({ message });
-     return result.text;
+  async generateProjectImage(prompt: string): Promise<string | null> {
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+    try {
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image',
+        contents: {
+          parts: [
+            {
+              text: `Professional software visualization: ${prompt}, sleek 3D isometric automation nodes, dark navy background, glowing light trails, enterprise software UI aesthetic, high fidelity, 4k.`,
+            },
+          ],
+        },
+      });
+
+      for (const part of response.candidates?.[0].content.parts || []) {
+        if (part.inlineData) {
+          return `data:image/png;base64,${part.inlineData.data}`;
+        }
+      }
+      return null;
+    } catch (e) {
+      console.error("Image generation failed:", e);
+      return null;
+    }
   }
 }
 

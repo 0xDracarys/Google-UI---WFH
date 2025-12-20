@@ -6,55 +6,57 @@ import { ICONS } from '../constants';
 interface NodeProps {
   node: WorkflowNode;
   selected?: boolean;
+  onMouseDown: (e: React.MouseEvent, id: string) => void;
+  onPortMouseDown: (e: React.MouseEvent, nodeId: string, portType: 'in' | 'out') => void;
+  onPortMouseUp: (e: React.MouseEvent, nodeId: string, portType: 'in' | 'out') => void;
 }
 
-export const Node: React.FC<NodeProps> = ({ node, selected }) => {
-  const isTrigger = node.type === 'trigger';
-  const Icon = node.service.includes('Calendar') ? ICONS.Calendar : ICONS.OpenAI;
+export const Node: React.FC<NodeProps> = ({ 
+  node, 
+  selected, 
+  onMouseDown, 
+}) => {
+  const serviceLower = node.service.toLowerCase();
+  
+  const getIcon = () => {
+    if (serviceLower.includes('google')) return ICONS.Google;
+    if (serviceLower.includes('slack')) return ICONS.Slack;
+    if (serviceLower.includes('openai')) return ICONS.OpenAI;
+    return ICONS.Home;
+  };
+
+  const Icon = getIcon();
 
   return (
     <div
-      className={`absolute w-[240px] bg-white rounded-[12px] node-shadow transition-all border-l-[6px] select-none cursor-move flex flex-col justify-center min-h-[72px] z-10 ${
-        selected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
-      }`}
+      onMouseDown={(e) => onMouseDown(e, node.id)}
+      className={`absolute w-[220px] bg-white rounded-[28px] transition-all select-none cursor-grab active:cursor-grabbing flex items-center z-10 p-[2px] ${
+        selected 
+          ? 'scale-105 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-[#1A73E8]' 
+          : 'shadow-[0_4px_15px_rgba(0,0,0,0.03)] border-transparent'
+      } border-2 group`}
       style={{
         left: node.position.x,
         top: node.position.y,
-        borderLeftColor: node.accentColor,
       }}
     >
-      <div className="px-4 py-3 flex items-center gap-3">
-        <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
-          <Icon className="w-8 h-8" />
+      <div className="flex items-center gap-4 bg-white w-full h-full rounded-[24px] px-5 py-4">
+        <div className={`w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-gray-50/50 group-hover:scale-110 transition-transform`}>
+          <Icon className="w-6 h-6" />
         </div>
-        <div className="overflow-hidden">
-          <h3 className="text-[14px] font-semibold text-gray-800 leading-tight truncate">{node.service}</h3>
-          <p className="text-[11px] text-gray-500 font-medium truncate">
-            {isTrigger ? 'Trigger: ' : 'Action: '}
-            {node.label}
-          </p>
+        
+        <div className="flex-1 min-w-0">
+          <h3 className="text-[14px] font-bold leading-tight truncate text-gray-900">
+            {node.service}
+          </h3>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: node.accentColor }} />
+            <span className="text-[9px] font-black uppercase tracking-widest truncate text-gray-400">
+              {node.label}
+            </span>
+          </div>
         </div>
       </div>
-      
-      {/* "Processing..." indicator for OpenAI action node as seen in screenshot */}
-      {node.service === 'OpenAI' && (
-        <div className="px-4 pb-3 flex items-center gap-1.5 text-[11px] text-blue-600 font-semibold -mt-1">
-          <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-            <circle cx="12" cy="12" r="10" strokeOpacity="0.2" />
-            <path d="M12 2a10 10 0 0 1 10 10" />
-          </svg>
-          Processing...
-        </div>
-      )}
-
-      {/* Input/Output Pins matching screenshot */}
-      {isTrigger ? (
-        <div className="absolute top-1/2 -right-[5px] -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 rounded-full border border-white" />
-      ) : (
-        <>
-          <div className="absolute top-1/2 -left-[5px] -translate-y-1/2 w-2.5 h-2.5 bg-gray-400 rounded-full border border-white" />
-        </>
-      )}
     </div>
   );
 };

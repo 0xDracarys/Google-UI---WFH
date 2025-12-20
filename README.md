@@ -1,20 +1,25 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# WorkflowHub Sketchbook: The AI-Native Automation Workbench
 
-# Run and deploy your AI Studio app
+## 🎯 Project Vision
+WorkflowHub Sketchbook is a revolutionary approach to digital automation. It reimagines the "automation engineer" as a "sketch artist," allowing users to describe intent in natural language to Gemini 3 Flash, which then architects a live, collaborative automation sketch.
 
-This contains everything you need to run your app locally.
+## 🏗️ Real n8n Integration: Technical Guide
+To transition from a "sketch" to a live production environment, follow this architectural setup:
 
-View your app in AI Studio: https://ai.studio/apps/drive/1sOdOvFMN9Zi_sjjr8stiwdZ19RC9xe08
+### 1. The Bridge Configuration
+1. **Endpoint**: Your private n8n instance `https://n8n.yourcompany.com/api/v1`.
+2. **Authentication**: Use n8n API keys (Header: `X-N8N-API-KEY`).
+3. **Synchronization Logic**:
+   - The Sketchbook serializes the `WorkflowState` into n8n's standard JSON format.
+   - **Nodes Mapping**:
+     - `service: "Google Calendar"` maps to `n8n-nodes-base.googleCalendarTrigger`.
+     - `service: "OpenAI"` maps to `n8n-nodes-base.openAi`.
+   - **Parameter Mapping**: Gemini handles the translation of natural language prompts into the specific JSON parameters required by n8n nodes.
 
-## Run Locally
+### 2. Implementation Steps
+- **POST /workflows**: Create the workflow in n8n.
+- **POST /workflows/:id/activate**: Activate for production use.
+- **Webhook Sync**: Use n8n webhooks to feed execution status back into the Sketchbook UI.
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🚀 Aim
+Lower the barrier to entry for enterprise automation by 10x, enabling non-technical teams to build high-scale architecture through simple conversation.
