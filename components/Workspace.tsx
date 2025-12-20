@@ -40,6 +40,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
   const [isPanningCanvas, setIsPanningCanvas] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [deploymentStatus, setDeploymentStatus] = useState<string | null>(null);
+  const [executionStatus, setExecutionStatus] = useState<Record<string, 'success' | 'failure' | 'running'>>({});
 
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -146,6 +147,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  // Placeholder for webhook logic
+  useEffect(() => {
+    // In a real application, you would set up a webhook endpoint to receive
+    // execution status updates from n8n. For now, we'll simulate it.
+    const interval = setInterval(() => {
+      const nodeId = nodes[Math.floor(Math.random() * nodes.length)]?.id;
+      if (nodeId) {
+        setExecutionStatus(prev => ({
+          ...prev,
+          [nodeId]: ['success', 'failure', 'running'][Math.floor(Math.random() * 3)] as 'success' | 'failure' | 'running'
+        }));
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [nodes]);
+
   const activeModalNode = nodes.find(n => n.id === (modalActiveNodeId || nodes[0]?.id));
 
   return (
@@ -247,7 +264,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
               onClick={handleDeploy}
               className="bg-[#1A73E8] text-white px-10 py-4 rounded-[24px] text-[14px] font-black hover:bg-blue-700 shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1"
             >
-              Build n8n Flow
+              Publish to n8n
             </button>
           </div>
         </div>
@@ -313,6 +330,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({ onBack }) => {
               key={node.id} 
               node={node} 
               selected={selectedNodeId === node.id} 
+              executionStatus={executionStatus[node.id]}
               onMouseDown={(e, id) => { 
                 e.stopPropagation(); 
                 setSelectedNodeId(id); 

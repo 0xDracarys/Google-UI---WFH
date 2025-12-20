@@ -6,6 +6,7 @@ import { ICONS } from '../constants';
 interface NodeProps {
   node: WorkflowNode;
   selected?: boolean;
+  executionStatus?: 'success' | 'failure' | 'running';
   onMouseDown: (e: React.MouseEvent, id: string) => void;
   onPortMouseDown: (e: React.MouseEvent, nodeId: string, portType: 'in' | 'out') => void;
   onPortMouseUp: (e: React.MouseEvent, nodeId: string, portType: 'in' | 'out') => void;
@@ -14,6 +15,7 @@ interface NodeProps {
 export const Node: React.FC<NodeProps> = ({ 
   node, 
   selected, 
+  executionStatus,
   onMouseDown, 
 }) => {
   const serviceLower = node.service.toLowerCase();
@@ -34,7 +36,7 @@ export const Node: React.FC<NodeProps> = ({
         selected 
           ? 'scale-105 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border-[#1A73E8]' 
           : 'shadow-[0_4px_15px_rgba(0,0,0,0.03)] border-transparent'
-      } border-2 group`}
+      } border-2 group sketched-node`}
       style={{
         left: node.position.x,
         top: node.position.y,
@@ -57,6 +59,20 @@ export const Node: React.FC<NodeProps> = ({
           </div>
         </div>
       </div>
+      {executionStatus && (
+        <div className={`absolute -top-2 -right-2 w-4 h-4 rounded-full border-2 border-white ${
+          executionStatus === 'success' ? 'bg-green-500' :
+          executionStatus === 'failure' ? 'bg-red-500' :
+          'bg-yellow-500'
+        }`} />
+      )}
+      <style jsx>{`
+        .sketched-node {
+          border: 2px solid #000;
+          border-radius: 28px;
+          box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+        }
+      `}</style>
     </div>
   );
 };
